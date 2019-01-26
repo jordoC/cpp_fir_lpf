@@ -1,0 +1,6 @@
+filter_coeffs.csv
+*.swp
+nonuniform_quantizer_codebook.csv
+nonuniform_quantizer_eight_bitcodebook.csv
+nonuniform_quantizer_partition.csv
+nonuniform_quantizer_eight_bit_codebook.csv
