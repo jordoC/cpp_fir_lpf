@@ -22,6 +22,9 @@ using namespace std;
  */
 namespace fir_filter 
 {
+    typedef ac_fixed<8,0,true> ac_8fx0_t;
+    typedef ac_fixed<8,4,true> ac_8fx4_t;
+    typedef ac_float<8,0,8,AC_RND> ac_8fp0_t;
 ////////////////////////////////////////////////////////////////////////////////
 class FirFilter
 {   
@@ -48,8 +51,8 @@ class FirFilter
         /**
          * process_fp
          */
-        void process_fp(string input_data_path,
-                vector<ac_float<_num_bits,0,_num_bits,AC_RND>> *output_vec);
+        void process_fp(string input_data_path, uint32_t input_len,
+                vector<ac_8fp0_t> *output_vec);
         
         /**
          * process_fx

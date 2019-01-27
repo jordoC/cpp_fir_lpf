@@ -8,17 +8,17 @@ FirFilter::FirFilter(string coeffs_path, string partition_path,
                 string codebook_path)
 {
     ifstream coeffs_file(coeffs_path);
-   _coeffs_vec_fixed = new vector<ac_fixed<_num_bits,0,true>>();
-   _coeffs_vec_float = new vector<ac_float<_num_bits,0,_num_bits,AC_RND>>();
+   _coeffs_vec_fixed = new vector<ac_8fx0_t>();
+   _coeffs_vec_float = new vector<ac_8fp0_t>();
     int i = 0;
     for(CSVIterator coeff_itr(coeffs_file); 
             coeff_itr!= CSVIterator(); 
             coeff_itr++, i++)
     {
         _coeffs_vec_fixed->push_back(
-                ac_fixed<_num_bits,0,true>(stof((*coeff_itr)[0])));
+                ac_8fx0_t(stof((*coeff_itr)[0])));
         _coeffs_vec_float->push_back(
-                ac_float<_num_bits,0,_num_bits,AC_RND>(stof((*coeff_itr)[0])));
+                ac_8fp0_t(stof((*coeff_itr)[0])));
         //cout << (*coeff_itr)[0] << ", ";
         //cout << fixed_coeff << ", ";
         //cout << float_coeff << endl;
@@ -26,17 +26,30 @@ FirFilter::FirFilter(string coeffs_path, string partition_path,
     
     ifstream partition_file(partition_path);
     ifstream codebook_file(codebook_path);
-    _quantizer_fixed = new map<double,ac_fixed<_num_bits,4,true>>();
-    _quantizer_float = new map<double, ac_float<_num_bits,0,_num_bits,AC_RND>>();
+    _quantizer_fixed = new map<double,ac_8fx4_t>();
+    _quantizer_float = new map<double, ac_8fp0_t>();
     i = 0;
+    double prev_part_val;
     for(CSVIterator part_itr(partition_file), codebook_itr(codebook_file); 
-            part_itr!= CSVIterator(); 
+            codebook_itr!= CSVIterator(); 
             part_itr++, codebook_itr++, i++)
     {
-        (*_quantizer_fixed)[(stod((*part_itr)[0]))] = 
-            ac_fixed<_num_bits,4,true>(stof((*codebook_itr)[0]));
-        (*_quantizer_float)[(stod((*part_itr)[0]))] = 
-           ac_float<_num_bits,0,_num_bits,AC_RND>(stof((*codebook_itr)[0]));
+        if(part_itr == CSVIterator())
+        {
+            (*_quantizer_fixed)[prev_part_val+1.0] = 
+                ac_8fx4_t(stof((*codebook_itr)[0]));
+            (*_quantizer_float)[prev_part_val+1.0] = 
+               ac_8fp0_t(stof((*codebook_itr)[0]));
+        }
+        else
+        {
+
+            (*_quantizer_fixed)[(stod((*part_itr)[0]))] = 
+                ac_8fx4_t(stof((*codebook_itr)[0]));
+            (*_quantizer_float)[(stod((*part_itr)[0]))] = 
+               ac_8fp0_t(stof((*codebook_itr)[0]));
+            prev_part_val = stod((*part_itr)[0]);
+        }
         //cout << (*loop)[0] << ", ";
         //cout << fixed_coeff << ", ";
         //cout << float_coeff << endl;
@@ -58,14 +71,15 @@ FirFilter::~FirFilter()
     return;
 }
 ////////////////////////////////////////////////////////////////////////////////
-void FirFilter::process_fp(string input_data_path, 
-        vector<ac_float<_num_bits,0,_num_bits,AC_RND>> *output_vec)
+void FirFilter::process_fp(string input_data_path, const uint32_t input_len,
+        vector<ac_8fp0_t> *output_vec)
 {
-    output_vec->clear();
 
     ifstream input_file(input_data_path);
-    const uint32_t input_len = 65536;
     vector<double> input_vec_float(input_len);
+
+    //TODO: fix this up: the input vector is a row vector, and the other
+    //      design files are column vectors: a bit inconsistent.
     for(CSVIterator input_itr(input_file); 
             input_itr!= CSVIterator(); 
             input_itr++) 
@@ -77,19 +91,44 @@ void FirFilter::process_fp(string input_data_path,
         }
     }
 
-    //for ( i = 0; i < sampleCount; i++ )
-    //{
-    //    y[i] = 0;                       // set to zero before sum
-    //    for ( j = 0; j < kernelCount; j++ )
-    //    {
-    //        if(j>i)
-    //            break;
-    //        else
-    //            y[i] += x[i - j] * h[j];    // convolve: multiply and accumulate
-    //    }
-    //}
-    for(int i=0; i<10; i++)
-        cout << input_vec_float[i] << endl;
+    output_vec->clear();
+    output_vec->resize(input_vec_float.size()+_coeffs_vec_float->size()+1);
+    for(uint64_t input_idx=0; 
+            input_idx<=input_vec_float.size()+_coeffs_vec_float->size(); input_idx++)
+    {
+        for(uint16_t filt_idx=0; filt_idx<_coeffs_vec_float->size(); filt_idx++)
+        {
+            output_vec->at(input_idx) = 0;
+            if(filt_idx>input_idx)
+                break;
+            else
+            {
+                if(input_idx<input_vec_float.size())
+                {
+                    ac_8fp0_t quantized_input = (_quantizer_float->lower_bound(
+                                input_vec_float.at(input_idx - filt_idx))--)->second;
+                    //cout << input_vec_float.at(input_idx - filt_idx) 
+                    //    << " vs. "<< quantized_input << endl;
+                    // convolve: multiply and accumulate
+                    output_vec->at(input_idx) +=  quantized_input * 
+                        _coeffs_vec_float->at(filt_idx); 
+                }
+                else
+                {
+                    ac_8fp0_t quantized_input = (_quantizer_float->lower_bound(
+                                input_vec_float.at(input_vec_float.size()-1- filt_idx))--)->second;
+                    //cout << input_vec_float.at(input_idx - filt_idx) 
+                    //    << " vs. "<< quantized_input << endl;
+                    // convolve: multiply and accumulate
+                    output_vec->at(input_idx) +=  quantized_input * 
+                        _coeffs_vec_float->at(filt_idx); 
+                }
+            }
+        }
+    }
+    
+    //for(int i=0; i<10; i++)
+    //    cout << input_vec_float[i] << endl;
     //cout << _coeffs_vec_float->size() << endl;
     //for(int i=0; i<_coeffs_vec_float->size(); i++)
     //    cout << (*_coeffs_vec_float)[i] << endl;
