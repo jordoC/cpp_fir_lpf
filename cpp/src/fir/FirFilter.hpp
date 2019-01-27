@@ -57,15 +57,16 @@ class FirFilter
         /**
          * process_fx
          */
-        void process_fx(string input_data_path);
+        void process_fx(string input_data_path, const uint32_t input_len,
+                vector<ac_8fx0_t> *output_vec);
         
     ////////////////////////////////////////////////////////////////////////////
     private:
-        vector<ac_fixed<_num_bits,0,true>> *_coeffs_vec_fixed;
-        vector<ac_float<_num_bits,0,8,AC_RND>> *_coeffs_vec_float;
+        vector<ac_8fx0_t> *_coeffs_vec_fixed;
+        vector<ac_8fp0_t> *_coeffs_vec_float;
 
-        map<double,ac_fixed<_num_bits,4,true>> *_quantizer_fixed;
-        map<double, ac_float<_num_bits,0,8,AC_RND>> *_quantizer_float;
+        map<double,ac_8fx4_t> *_quantizer_fixed;
+        map<double, ac_8fp0_t> *_quantizer_float;
         
 };
 ////////////////////////////////////////////////////////////////////////////////
