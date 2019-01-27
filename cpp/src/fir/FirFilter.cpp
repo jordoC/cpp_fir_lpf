@@ -82,7 +82,10 @@ void FirFilter::process_fp(string input_data_path,
     //    y[i] = 0;                       // set to zero before sum
     //    for ( j = 0; j < kernelCount; j++ )
     //    {
-    //        y[i] += x[i - j] * h[j];    // convolve: multiply and accumulate
+    //        if(j>i)
+    //            break;
+    //        else
+    //            y[i] += x[i - j] * h[j];    // convolve: multiply and accumulate
     //    }
     //}
     for(int i=0; i<10; i++)
