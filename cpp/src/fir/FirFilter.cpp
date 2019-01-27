@@ -92,38 +92,26 @@ void FirFilter::process_fp(string input_data_path, const uint32_t input_len,
     }
 
     output_vec->clear();
-    output_vec->resize(input_vec_float.size()+_coeffs_vec_float->size()+1);
-    for(uint64_t input_idx=0; 
-            input_idx<=input_vec_float.size()+_coeffs_vec_float->size(); input_idx++)
+    output_vec->resize(input_vec_float.size()+_coeffs_vec_float->size()-1);
+    for(auto output_idx(0); 
+            output_idx<output_vec->size();
+            output_idx++)
     {
-        for(uint16_t filt_idx=0; filt_idx<_coeffs_vec_float->size(); filt_idx++)
+        int const f_idx_min = (output_idx >= input_len - 1)? 
+            output_idx - (input_len - 1) : 0;
+        int const f_idx_max = (output_idx <  (_coeffs_vec_float->size() - 1))? 
+            output_idx : (_coeffs_vec_float->size() - 1);
+
+        for(auto filt_idx(f_idx_min); filt_idx<f_idx_max; filt_idx++)
         {
-            output_vec->at(input_idx) = 0;
-            if(filt_idx>input_idx)
-                break;
-            else
-            {
-                if(input_idx<input_vec_float.size())
-                {
-                    ac_8fp0_t quantized_input = (_quantizer_float->lower_bound(
-                                input_vec_float.at(input_idx - filt_idx))--)->second;
-                    //cout << input_vec_float.at(input_idx - filt_idx) 
-                    //    << " vs. "<< quantized_input << endl;
-                    // convolve: multiply and accumulate
-                    output_vec->at(input_idx) +=  quantized_input * 
-                        _coeffs_vec_float->at(filt_idx); 
-                }
-                else
-                {
-                    ac_8fp0_t quantized_input = (_quantizer_float->lower_bound(
-                                input_vec_float.at(input_vec_float.size()-1- filt_idx))--)->second;
-                    //cout << input_vec_float.at(input_idx - filt_idx) 
-                    //    << " vs. "<< quantized_input << endl;
-                    // convolve: multiply and accumulate
-                    output_vec->at(input_idx) +=  quantized_input * 
-                        _coeffs_vec_float->at(filt_idx); 
-                }
-            }
+            output_vec->at(output_idx) = 0;
+            ac_8fp0_t quantized_input = (_quantizer_float->lower_bound(
+                        input_vec_float.at(output_idx - filt_idx))--)->second;
+            //cout << input_vec_float.at(input_idx - filt_idx) 
+            //    << " vs. "<< quantized_input << endl;
+            // convolve: multiply and accumulate
+            output_vec->at(output_idx) +=  quantized_input * 
+                _coeffs_vec_float->at(filt_idx); 
         }
     }
     
