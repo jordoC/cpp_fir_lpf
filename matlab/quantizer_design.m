@@ -43,6 +43,6 @@ distor3
 
 %eight_bit_partition = fi(nonuniform_partition,1,num_bits,num_frac_bits);
 
-csvwrite('nonuniform_quantizer_partition.csv',nonuniform_partition);
-csvwrite('nonuniform_quantizer_codebook.csv',nonuniform_codebook);
-csvwrite('nonuniform_quantizer_eight_bit_codebook.csv',eight_bit_codebook_vec');
+csvwrite('nonuniform_quantizer_partition.csv',nonuniform_partition');
+csvwrite('nonuniform_quantizer_codebook.csv',nonuniform_codebook');
+csvwrite('nonuniform_quantizer_eight_bit_codebook.csv',eight_bit_codebook_vec);

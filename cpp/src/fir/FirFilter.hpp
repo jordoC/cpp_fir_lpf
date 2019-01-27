@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <stdint.h>
 #include "../ac/include/ac_fixed.h"
 #include "../ac/include/ac_float.h"
@@ -26,6 +27,7 @@ class FirFilter
 {   
     ////////////////////////////////////////////////////////////////////////////
     public:
+        static const uint8_t _num_bits = 8;
         /**
          *  Constructor
          *  @param  string coeffs_path
@@ -36,7 +38,7 @@ class FirFilter
          *          Path to CSV file of quantizer codebook 
          */
         FirFilter(string coeffs_path, string partition_path, 
-                string codebook_path, uint8_t num_frac_bits);
+                string codebook_path);
         
         /**
          *  Destructor
@@ -46,7 +48,8 @@ class FirFilter
         /**
          * process_fp
          */
-        void process_fp(string input_data_path);
+        void process_fp(string input_data_path,
+                vector<ac_float<_num_bits,0,_num_bits,AC_RND>> *output_vec);
         
         /**
          * process_fx
@@ -55,9 +58,11 @@ class FirFilter
         
     ////////////////////////////////////////////////////////////////////////////
     private:
-        static const uint8_t _num_bits = 8;
         vector<ac_fixed<_num_bits,0,true>> *_coeffs_vec_fixed;
-        vector<ac_float<_num_bits,0,1,AC_RND>> *_coeffs_vec_float;
+        vector<ac_float<_num_bits,0,8,AC_RND>> *_coeffs_vec_float;
+
+        map<double,ac_fixed<_num_bits,4,true>> *_quantizer_fixed;
+        map<double, ac_float<_num_bits,0,8,AC_RND>> *_quantizer_float;
         
 };
 ////////////////////////////////////////////////////////////////////////////////

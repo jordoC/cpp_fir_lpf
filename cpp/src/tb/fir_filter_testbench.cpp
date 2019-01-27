@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <cstdlib>
+#include "../ac/include/ac_fixed.h"
+#include "../ac/include/ac_float.h"
 
 
 //#define DBG
@@ -24,9 +26,13 @@ void usage(void)
 int main(int argc, char* argv[])
 {
     int c ;
-    uint8_t num_frac_bits = 4;
-    string coeffs_path = "filter_coefs.csv";
-    while( ( c = getopt (argc, argv, "c:h") ) != -1 ) 
+    static const uint8_t num_bits = 8;
+    static const uint8_t num_int_bits = 4;
+    string coeffs_path = "filter_coeffs.csv";
+    string partition_path = "nonuniform_quantizer_partition.csv";
+    string codebook_path = "nonuniform_quantizer_codebook.csv";
+    string input_path = "input_data.csv";
+    while( ( c = getopt (argc, argv, "c:p:q:i:h") ) != -1 ) 
     {
         switch(c)
         {
@@ -36,22 +42,27 @@ int main(int argc, char* argv[])
             case 'c':
                 if(optarg) coeffs_path = optarg ;
                 break;
-            //case 'e':
-            //    if(optarg) orth_constr = stod(optarg) ;
-            //    break;
-            //case 'r':
-            //    if(optarg) num_realizations = atoi(optarg) ;
-            //    break;
-            //case 's':
-            //    if(optarg) num_samps = atoi(optarg) ;
-            //    break;
+            case 'p':
+                if(optarg) partition_path = optarg ;
+                break;
+            case 'q':
+                if(optarg) codebook_path = optarg ;
+                break;
+            case 'i':
+                if(optarg) input_path = optarg ;
+                break;
         }
     }
 
-    FirFilter filt(coeffs_path,"","",4);
+    FirFilter filt(coeffs_path, partition_path, codebook_path);
+    vector<ac_float<num_bits,0,num_bits,AC_RND>> *output_float_vec =
+        new vector<ac_float<num_bits,0,num_bits,AC_RND>>();
+    filt.process_fp(input_path, output_float_vec);
 
     //Cleanup
     ////////////////////////////////////////////////////////////////////////////
+    output_float_vec->clear();
+    delete output_float_vec;
     
     return 0;
 }
