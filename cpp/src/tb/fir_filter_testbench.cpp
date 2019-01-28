@@ -24,10 +24,10 @@ void usage(void)
     cout << "8 bit fixed vs. float FIR filter quantization comparison." <<endl;
     cout << "Usage:" <<endl;
     cout << "-h     Print this help message"<<endl;
-    cout << "-c     (String) path to CSV column file of filter coefficients
-    cout << "-p     (String) path to CSV column file of quatizer partitions
-    cout << "-q     (String) path to CSV column file of quantizer codebook
-    cout << "-i     (String) path to CSV row file of input signal to filter
+    cout << "-c     (String) path to CSV column file of filter coefficients"<<endl;
+    cout << "-p     (String) path to CSV column file of quatizer partitions"<<endl;
+    cout << "-q     (String) path to CSV column file of quantizer codebook"<<endl;
+    cout << "-i     (String) path to CSV row file of input signal to filter"<<endl;
     return;
 }
 ////////////////////////////////////////////////////////////////////////////////
