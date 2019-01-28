@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%FIR filter design for Ciena DSP Design Position
+%FIR filter design for DSP Design Position
 %   Author: J.Clarke
 %   Date:   January 2019
 %   Note:   Tested using Matlab R2018a
@@ -27,4 +27,4 @@ wt = F_cutoff/F_samp - 0.042; %pass-band emphasis--a convenient tuning parameter
 coeffs = fircls1(n_taps-1,w_cutoff,max_pb_rip_lin,max_sb_rip_lin,wt)
 fvtool(coeffs,1);
 
-csvwrite('filter_coeffs.csv',coeffs);
+csvwrite('filter_coeffs.csv',coeffs');
