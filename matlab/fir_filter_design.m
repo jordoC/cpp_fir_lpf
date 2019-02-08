@@ -28,3 +28,27 @@ coeffs = fircls1(n_taps-1,w_cutoff,max_pb_rip_lin,max_sb_rip_lin,wt)
 fvtool(coeffs,1);
 
 csvwrite('filter_coeffs.csv',coeffs');
+
+input = csvread('input_data.csv');
+
+figure(8); clf; hold on;
+hist(input,20)
+xlabel('Value');
+ylabel('Frequency');
+
+figure(9); clf; hold on;
+plot(20*log10(abs(fft(input,1024)/1024)))
+xlabel('FFT Bin index');
+ylabel('Magnitude (dB)');
+
+output = conv(input,coeffs);
+
+figure(10); clf; hold on;
+plot(20*log10(abs(fft(output,1024)/1024)))
+xlabel('FFT Bin index');
+ylabel('Magnitude (dB)');
+
+figure(11); clf; hold on;
+hist(output,20)
+xlabel('Value');
+ylabel('Frequency');

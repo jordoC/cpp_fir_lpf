@@ -41,11 +41,13 @@ double calc_sqnr(vector<ac_8fp0_t> *output_vec_float,
     {
         numerator_running_sum = numerator_running_sum + 
             pow(output_vec_float->at(i).to_double(),2);
-        //cout << output_vec_float->at(i).to_double() << endl;
+        //cout << 10*log10(pow(output_vec_float->at(i).to_double(),2)) << endl;
         denominator_running_sum = denominator_running_sum +
             pow(abs(output_vec_float->at(i).to_double() - 
             output_vec_fixed->at(i).to_double()),2);
     }
+    cout << "Average Output Power: " <<
+        10*log10(numerator_running_sum/output_vec_float->size()) <<" dB"<< endl;
     sqnr = 10*log10(numerator_running_sum/denominator_running_sum);
     return sqnr;
 }
