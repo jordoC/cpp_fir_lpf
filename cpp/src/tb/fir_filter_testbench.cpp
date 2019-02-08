@@ -37,9 +37,11 @@ double calc_sqnr(vector<ac_8fp0_t> *output_vec_float,
     double sqnr;
     double numerator_running_sum = 0, denominator_running_sum = 0;
     for(auto i(0); i<output_vec_float->size(); i++)
+    //for(auto i(0); i<50; i++)
     {
         numerator_running_sum = numerator_running_sum + 
             pow(output_vec_float->at(i).to_double(),2);
+        //cout << output_vec_float->at(i).to_double() << endl;
         denominator_running_sum = denominator_running_sum +
             pow(abs(output_vec_float->at(i).to_double() - 
             output_vec_fixed->at(i).to_double()),2);

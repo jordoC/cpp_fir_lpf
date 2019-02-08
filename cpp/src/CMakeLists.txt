@@ -9,6 +9,8 @@ set (Tutorial_VERSION_MINOR 0)
 
 # Use C++ 11 standard for compilation
 set (CMAKE_CXX_STANDARD 11)
+# Build with debug symbols
+set(CMAKE_BUILD_TYPE Debug)
 
 add_subdirectory (csv)
 add_subdirectory (fir)
